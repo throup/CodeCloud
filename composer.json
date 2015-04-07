@@ -1,0 +1,12 @@
+{
+  "name": "throup/codecloud",
+  "description": "Generate a tag cloud from PHP code",
+  "minimum-stability": "stable",
+  "license": "LGPL-3+",
+  "authors": [
+    {
+      "name": "Chris Throup",
+      "email": "chris@throup.org.uk"
+    }
+  ]
+}
