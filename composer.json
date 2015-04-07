@@ -9,6 +9,16 @@
       "email": "chris@throup.org.uk"
     }
   ],
+  "autoload": {
+    "psr-4": {
+      "CodeCloud\\": "src/"
+    }
+  },
+  "autoload-dev": {
+    "psr-4": {
+      "CodeCloud\\": "tests/"
+    }
+  },
   "require-dev": {
     "phpunit/phpunit": "~4.6"
   },
