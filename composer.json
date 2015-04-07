@@ -8,5 +8,11 @@
       "name": "Chris Throup",
       "email": "chris@throup.org.uk"
     }
-  ]
+  ],
+  "require-dev": {
+    "phpunit/phpunit": "~4.6"
+  },
+  "require": {
+    "nikic/php-parser": "~1.2"
+  }
 }
