@@ -21,6 +21,9 @@ class Analyser {
         foreach ($tokens as $node) {
             $this->processNode($node);
         }
+
+        ksort($this->analysed);
+        arsort($this->analysed);
         return $this->analysed;
     }
 
@@ -59,13 +62,18 @@ class Analyser {
                 break;
 
             case 'PhpParser\Node\Expr\Assign':
-                /** @var Node\Expr\Assign $node */
+            case 'PhpParser\Node\Expr\AssignOp\Concat':
+                /** @var Node\Expr\Assign|Node\Expr\AssignOp\Concat $node */
                 $this->processNode($node->var);
                 $this->processNode($node->expr);
                 break;
 
             case 'PhpParser\Node\Expr\BinaryOp\Identical':
-                /** @var Node\Expr\BinaryOp\Identical $node */
+            case 'PhpParser\Node\Expr\BinaryOp\NotIdentical':
+            case 'PhpParser\Node\Expr\BinaryOp\BooleanOr':
+            case 'PhpParser\Node\Expr\BinaryOp\Equal':
+            case 'PhpParser\Node\Expr\BinaryOp\Concat':
+                /** @var Node\Expr\BinaryOp\Identical|Node\Expr\BinaryOp\NotIdentical|Node\Expr\BinaryOp\BooleanOr|Node\Expr\BinaryOp\Equal|Node\Expr\BinaryOp\Concat $node */
                 $this->processNode($node->left);
                 $this->processNode($node->right);
                 break;
@@ -178,6 +186,13 @@ class Analyser {
                 $this->processNode($node->else);
                 break;
 
+            case 'PhpParser\Node\Stmt\Else_':
+                /** @var Node\Stmt\Else_ $node */
+                foreach ($node->stmts as $part) {
+                    $this->processNode($part);
+                }
+                break;
+
             case 'PhpParser\Node\Arg':
             /** @var Node\Arg $node */
                 $this->processNode($node->value);
@@ -186,6 +201,7 @@ class Analyser {
             case 'PhpParser\Node\Stmt\Return_':
             case 'PhpParser\Node\Expr\BooleanNot':
             case 'PhpParser\Node\Expr\Cast\String_':
+            case 'PhpParser\Node\Expr\Cast\Int_':
             case 'PhpParser\Node\Stmt\Throw_':
                 $this->processNode($node->expr);
                 break;
@@ -197,6 +213,21 @@ class Analyser {
                 foreach ($node->args as $part) {
                     $this->processNode($part);
                 }
+                break;
+
+            case 'PhpParser\Node\Expr\StaticCall':
+                /** @var Node\Expr\StaticCall $node */
+                $this->processNode($node->class);
+                $this->tally($node->name);
+                foreach ($node->args as $part) {
+                    $this->processNode($part);
+                }
+                break;
+
+            case 'PhpParser\Node\Expr\ClassConstFetch':
+                /** @var Node\Expr\ClassConstFetch $node */
+                $this->processNode($node->class);
+                $this->tally($node->name);
                 break;
 
             case 'PhpParser\Node\Expr\FuncCall':
@@ -211,6 +242,12 @@ class Analyser {
             /** @var Node\Expr\ArrayDimFetch $node */
                 $this->processNode($node->var);
                 $this->processNode($node->dim);
+                break;
+
+            case 'PhpParser\Node\Expr\ArrayItem':
+                /** @var Node\Expr\ArrayItem $node */
+                $this->processNode($node->key);
+                $this->processNode($node->value);
                 break;
 
             case 'PhpParser\Node\Expr\PropertyFetch':
