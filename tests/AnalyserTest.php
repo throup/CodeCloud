@@ -143,4 +143,20 @@ class AnalyserTest extends PHPUnit_Framework_TestCase {
 
         $this->assertEquals($expected, $analyser->analyse($code));
     }
+
+    /**
+     * @test
+     * @expectedException \CodeCloud\Exception\UnknownNode
+     */
+    public function throwsExceptionForUnknownParserNodes() {
+        $unknownNode = $this->getMockForAbstractClass('PhpParser\Node');
+        $code = 'Irrelevant';
+
+        $prophet = $this->prophesize('PhpParser\ParserAbstract');
+        $prophet->parse($code)->willReturn([$unknownNode]);
+        $parser = $prophet->reveal();
+
+        $analyser = new Analyser($parser);
+        $analyser->analyse($code);
+    }
 }

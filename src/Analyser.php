@@ -5,17 +5,24 @@ namespace CodeCloud;
 use PhpParser\Lexer;
 use PhpParser\Node;
 use PhpParser\Parser;
+use PhpParser\ParserAbstract;
 
 
 class Analyser {
+    public function __construct(ParserAbstract $parser = null) {
+        if (!$parser) {
+            $parser = new Parser(new Lexer);
+        }
+        $this->parser = $parser;
+    }
+
     /**
      * @param  string      $code
      *
      * @return array|int[]
      */
     public function analyse($code) {
-        $parser = new Parser(new Lexer);
-        $tokens = $parser->parse($code);
+        $tokens = $this->parser->parse($code);
 
         $this->analysed = [];
         foreach ($tokens as $node) {
@@ -60,9 +67,17 @@ class Analyser {
                 break;
 
             default:
-                throw new \Exception(var_export($node, true));
+                throw new Exception\UnknownNode(var_export($node, true));
         }
     }
 
+    /**
+     * @var array|int[]
+     */
     private $analysed = [];
+
+    /**
+     * @var ParserAbstract
+     */
+    private $parser;
 }
