@@ -1,5 +1,5 @@
 {
-  "name": "throup/codecloud",
+  "name": "throup/codous",
   "description": "Generate a tag cloud from PHP code",
   "minimum-stability": "stable",
   "license": "LGPL-3.0+",
@@ -11,12 +11,12 @@
   ],
   "autoload": {
     "psr-4": {
-      "CodeCloud\\": "src/"
+      "Codous\\": "src/"
     }
   },
   "autoload-dev": {
     "psr-4": {
-      "CodeCloud\\": "tests/"
+      "Codous\\": "tests/"
     }
   },
   "require-dev": {

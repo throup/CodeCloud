@@ -1,6 +1,6 @@
 <?php
 
-namespace CodeCloud;
+namespace Codous;
 
 use PHPUnit_Framework_TestCase;
 
@@ -146,7 +146,7 @@ class AnalyserTest extends PHPUnit_Framework_TestCase {
 
     /**
      * @test
-     * @expectedException \CodeCloud\Exception\UnknownNode
+     * @expectedException \Codous\Exception\UnknownNode
      */
     public function throwsExceptionForUnknownParserNodes() {
         $unknownNode = $this->getMockForAbstractClass('PhpParser\Node');

@@ -1,6 +1,6 @@
 <?php
 
-namespace CodeCloud;
+namespace Codous;
 
 use PhpParser\Lexer;
 use PhpParser\Node;

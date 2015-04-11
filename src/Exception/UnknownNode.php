@@ -1,6 +1,6 @@
 <?php
 
-namespace CodeCloud\Exception;
+namespace Codous\Exception;
 
 use Exception;
 
