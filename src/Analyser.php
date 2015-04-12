@@ -9,6 +9,14 @@ use PhpParser\ParserAbstract;
 
 
 class Analyser {
+    const RECOGNISED_NODES = [
+        'PhpParser\Node\Expr\Variable',
+        'PhpParser\Node\Expr\Assign',
+        'PhpParser\Node\Scalar\String_',
+        'PhpParser\Node\Scalar\LNumber',
+        'PhpParser\Node\Scalar\DNumber',
+    ];
+
     public function __construct(ParserAbstract $parser = null) {
         if (!$parser) {
             $parser = new Parser(new Lexer);
@@ -20,12 +28,14 @@ class Analyser {
      * @param  string      $code
      *
      * @return array|int[]
+     * @throws Exception\UnknownNode
      */
     public function analyse($code) {
         $tokens = $this->parser->parse($code);
 
         $this->analysed = [];
         foreach ($tokens as $node) {
+            $this->identifyNode($node);
             $this->processNode($node);
         }
         return $this->analysed;
@@ -42,32 +52,38 @@ class Analyser {
     }
 
     /**
+     * @param $node
+     * @throws Exception\UnknownNode
+     */
+    private function identifyNode($node) {
+        if (!$this->isRecognised($node)) {
+            throw new Exception\UnknownNode(var_export($node, true));
+        }
+    }
+
+    /**
+     * @param $node
+     * @return bool
+     */
+    private function isRecognised($node) {
+        return in_array(get_class($node), self::RECOGNISED_NODES);
+    }
+
+    /**
      * @param Node\Expr $node
      */
     private function processNode(Node $node) {
-        switch (get_class($node)) {
-            case 'PhpParser\Node\Expr\Variable':
-            /** @var Node\Expr\Variable $node */
-                $this->tally($node->name);
-                break;
-
-            case 'PhpParser\Node\Expr\Assign':
-                /** @var Node\Expr\Assign $node */
-                $this->processNode($node->var);
-                $this->processNode($node->expr);
-                break;
-
-            case 'PhpParser\Node\Scalar\String_':
-            case 'PhpParser\Node\Scalar\LNumber':
-            case 'PhpParser\Node\Scalar\DNumber':
-            /**
-             * @var Node\Scalar\String_|Node\Scalar\LNumber|Node\Scalar\DNumber $node
-             */
-                $this->tally((string) $node->value);
-                break;
-
-            default:
-                throw new Exception\UnknownNode(var_export($node, true));
+        if (isset($node->name)) {
+            $this->tally($node->name);
+        }
+        if (isset($node->value)) {
+            $this->tally((string) $node->value);
+        }
+        if (isset($node->var)) {
+            $this->processNode($node->var);
+        }
+        if (isset($node->expr)) {
+            $this->processNode($node->expr);
         }
     }
 
