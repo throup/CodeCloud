@@ -52,20 +52,20 @@ class Analyser {
     }
 
     /**
-     * @param $node
+     * @param  Node $node
      * @throws Exception\UnknownNode
      */
-    private function identifyNode($node) {
+    private function identifyNode(Node $node) {
         if (!$this->isRecognised($node)) {
-            throw new Exception\UnknownNode(var_export($node, true));
+            throw new Exception\UnknownNode($node);
         }
     }
 
     /**
-     * @param $node
+     * @param  Node $node
      * @return bool
      */
-    private function isRecognised($node) {
+    private function isRecognised(Node $node) {
         return in_array(get_class($node), self::RECOGNISED_NODES);
     }
 
@@ -97,3 +97,4 @@ class Analyser {
      */
     private $parser;
 }
+
