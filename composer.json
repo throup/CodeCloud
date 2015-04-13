@@ -16,7 +16,7 @@
   },
   "autoload-dev": {
     "psr-4": {
-      "Codographic\\": "tests/"
+      "Codographic\\": "tests/unit/"
     }
   },
   "require-dev": {
