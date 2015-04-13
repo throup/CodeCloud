@@ -15,6 +15,16 @@ class Analyser {
         'PhpParser\Node\Scalar\String_',
         'PhpParser\Node\Scalar\LNumber',
         'PhpParser\Node\Scalar\DNumber',
+        'PhpParser\Node\Stmt\Namespace_',
+    ];
+
+    const NODE_PROPERTIES = [
+        'name',
+        'value',
+        'var',
+        'expr',
+        'stmts',
+        'parts',
     ];
 
     public function __construct(ParserAbstract $parser = null) {
@@ -42,9 +52,10 @@ class Analyser {
     }
 
     /**
-     * @param $name
+     * @param string $name
      */
     private function tally($name) {
+        $name = (string) $name;
         if (!array_key_exists($name, $this->analysed)) {
             $this->analysed[$name] = 0;
         }
@@ -73,17 +84,25 @@ class Analyser {
      * @param Node\Expr $node
      */
     private function processNode(Node $node) {
-        if (isset($node->name)) {
-            $this->tally($node->name);
+        foreach (self::NODE_PROPERTIES as $property) {
+            if (isset($node->$property)) {
+                $this->processOrTally($node->$property);
+            }
         }
-        if (isset($node->value)) {
-            $this->tally((string) $node->value);
-        }
-        if (isset($node->var)) {
-            $this->processNode($node->var);
-        }
-        if (isset($node->expr)) {
-            $this->processNode($node->expr);
+    }
+
+    /**
+     * @param Node|string $item
+     */
+    private function processOrTally($item) {
+        if (is_array($item)) {
+            foreach ($item as $subitem) {
+                $this->processOrTally($subitem);
+            }
+        } else if ($item instanceof Node) {
+            $this->processNode($item);
+        } else {
+            $this->tally($item);
         }
     }
 
@@ -97,4 +116,3 @@ class Analyser {
      */
     private $parser;
 }
-

@@ -146,6 +146,55 @@ class AnalyserTest extends PHPUnit_Framework_TestCase {
 
     /**
      * @test
+     */
+    public function singleNamespace() {
+        $analyser = new Analyser();
+
+        $code = '<?php namespace Example;';
+
+        $expected = [
+            'Example' => 1,
+        ];
+
+        $this->assertEquals($expected, $analyser->analyse($code));
+    }
+
+    /**
+     * @test
+     */
+    public function twoNamespaces() {
+        $analyser = new Analyser();
+
+        $code = '<?php namespace Example {} namespace Another {}';
+
+        $expected = [
+            'Example' => 1,
+            'Another' => 1,
+        ];
+
+        $this->assertEquals($expected, $analyser->analyse($code));
+    }
+
+    /**
+     * @test
+     */
+    public function namespacesWithContent() {
+        $analyser = new Analyser();
+
+        $code = '<?php namespace Example { $variable; } namespace Another { $assignment = $variable; }';
+
+        $expected = [
+            'Example'    => 1,
+            'Another'    => 1,
+            'assignment' => 1,
+            'variable'   => 2,
+        ];
+
+        $this->assertEquals($expected, $analyser->analyse($code));
+    }
+
+    /**
+     * @test
      * @expectedException \Codographic\Exception\UnknownNode
      */
     public function throwsExceptionForUnknownParserNodes() {
