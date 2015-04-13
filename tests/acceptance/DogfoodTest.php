@@ -15,6 +15,6 @@ class DogfoodTest extends PHPUnit_Framework_TestCase {
         $code      = file_get_contents($filename);
 
         $analyser  = new Analyser();
-        $analyser->analyse($code);
+        $this->assertEquals([], $analyser->analyse($code));
     }
 }

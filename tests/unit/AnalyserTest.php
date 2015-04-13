@@ -195,6 +195,37 @@ class AnalyserTest extends PHPUnit_Framework_TestCase {
 
     /**
      * @test
+     */
+    public function singleGlobal() {
+        $analyser = new Analyser();
+
+        $code = '<?php global $variable;';
+
+        $expected = [
+            'variable' => 1,
+        ];
+
+        $this->assertEquals($expected, $analyser->analyse($code));
+    }
+
+    /**
+     * @test
+     */
+    public function twoGlobals() {
+        $analyser = new Analyser();
+
+        $code = '<?php global $variable, $another;';
+
+        $expected = [
+            'another'  => 1,
+            'variable' => 1,
+        ];
+
+        $this->assertEquals($expected, $analyser->analyse($code));
+    }
+
+    /**
+     * @test
      * @expectedException \Codographic\Exception\UnknownNode
      */
     public function throwsExceptionForUnknownParserNodes() {

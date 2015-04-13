@@ -2,6 +2,7 @@
 
 namespace Codographic\Exception;
 
+use Codographic\Analyser;
 use Codographic\Exception;
 use PhpParser\Node;
 
@@ -11,23 +12,10 @@ class UnknownNode extends Exception {
         if ($node) {
             $class = get_class($node);
             $message = "Node is instance of class '{$class}'. ";
-            $actions = [
-                'processNode'  => [],
-                'processNodes' => [],
-                'tally'        => [],
-                'tallyArray'   => [],
-            ];
+            $actions = [];
             foreach ($node as $property => $value) {
-                if (is_array($value)) {
-                    if ($value && ($value[0] instanceof Node)) {
-                        $actions['processNodes'][] = $property;
-                    } else {
-                        $actions['tallyArray'][] = $property;
-                    }
-                } else if ($value instanceof Node) {
-                    $actions['processNode'][] = $property;
-                } else {
-                    $actions['tally'][] = $property;
+                if (!in_array($property, Analyser::NODE_PROPERTIES)) {
+                    $actions[] = $property;
                 }
             }
             $message .=  var_export($actions, true);

@@ -10,21 +10,76 @@ use PhpParser\ParserAbstract;
 
 class Analyser {
     const RECOGNISED_NODES = [
-        'PhpParser\Node\Expr\Variable',
+        'PhpParser\Node\Arg',
+        'PhpParser\Node\Const_',
+        'PhpParser\Node\Expr\Array_',
+        'PhpParser\Node\Expr\ArrayDimFetch',
+        'PhpParser\Node\Expr\ArrayItem',
         'PhpParser\Node\Expr\Assign',
+        'PhpParser\Node\Expr\BooleanNot',
+        'PhpParser\Node\Expr\Cast\String_',
+        'PhpParser\Node\Expr\ClassConstFetch',
+        'PhpParser\Node\Expr\ConstFetch',
+        'PhpParser\Node\Expr\FuncCall',
+        'PhpParser\Node\Expr\Instanceof_',
+        'PhpParser\Node\Expr\Isset_',
+        'PhpParser\Node\Expr\MethodCall',
+        'PhpParser\Node\Expr\New_',
+        'PhpParser\Node\Expr\PostInc',
+        'PhpParser\Node\Expr\PropertyFetch',
+        'PhpParser\Node\Expr\Variable',
+        'PhpParser\Node\Name',
+        'PhpParser\Node\Param',
         'PhpParser\Node\Scalar\String_',
         'PhpParser\Node\Scalar\LNumber',
         'PhpParser\Node\Scalar\DNumber',
+        'PhpParser\Node\Stmt\Class_',
+        'PhpParser\Node\Stmt\ClassConst',
+        'PhpParser\Node\Stmt\ClassMethod',
+        'PhpParser\Node\Stmt\Else_',
+        'PhpParser\Node\Stmt\Foreach_',
+        'PhpParser\Node\Stmt\Global_',
+        'PhpParser\Node\Stmt\If_',
         'PhpParser\Node\Stmt\Namespace_',
+        'PhpParser\Node\Stmt\Property',
+        'PhpParser\Node\Stmt\PropertyProperty',
+        'PhpParser\Node\Stmt\Return_',
+        'PhpParser\Node\Stmt\Throw_',
+        'PhpParser\Node\Stmt\Use_',
+        'PhpParser\Node\Stmt\UseUse',
     ];
 
     const NODE_PROPERTIES = [
         'name',
         'value',
         'var',
+        'vars',
         'expr',
         'stmts',
         'parts',
+        'uses',
+        'type',
+        'alias',
+        'extends',
+        'implements',
+        'consts',
+        'items',
+        'key',
+        'byRef',
+        'params',
+        'returnType',
+        'cond',
+        'elseifs',
+        'else',
+        'class',
+        'args',
+        'unpack',
+        'variadic',
+        'default',
+        'keyVar',
+        'valueVar',
+        'dim',
+        'props',
     ];
 
     public function __construct(ParserAbstract $parser = null) {
@@ -45,7 +100,6 @@ class Analyser {
 
         $this->analysed = [];
         foreach ($tokens as $node) {
-            $this->identifyNode($node);
             $this->processNode($node);
         }
         return $this->analysed;
@@ -84,6 +138,7 @@ class Analyser {
      * @param Node\Expr $node
      */
     private function processNode(Node $node) {
+        $this->identifyNode($node);
         foreach (self::NODE_PROPERTIES as $property) {
             if (isset($node->$property)) {
                 $this->processOrTally($node->$property);
