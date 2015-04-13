@@ -1,8 +1,8 @@
 <?php
 
-namespace Codous\Exception;
+namespace Codographic\Exception;
 
-use Codous\Exception;
+use Codographic\Exception;
 use PhpParser\Node;
 
 

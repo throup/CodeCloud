@@ -1,6 +1,6 @@
 <?php
 
-namespace Codous;
+namespace Codographic;
 
 abstract class Exception extends \Exception {
 }

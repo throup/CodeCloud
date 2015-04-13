@@ -1,6 +1,6 @@
 <?php
 
-namespace Codous;
+namespace Codographic;
 
 use PhpParser\Lexer;
 use PhpParser\Node;

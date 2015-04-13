@@ -1,6 +1,6 @@
 <?php
 
-namespace Codous\Exception;
+namespace Codographic\Exception;
 
 use PHPUnit_Framework_TestCase;
 
@@ -11,7 +11,7 @@ class UnknownNodeTest extends PHPUnit_Framework_TestCase {
      */
     public function instanceOfNamespaceException() {
         $instance = new UnknownNode();
-        $this->assertInstanceOf('Codous\Exception', $instance);
+        $this->assertInstanceOf('Codographic\Exception', $instance);
     }
 
     /**
