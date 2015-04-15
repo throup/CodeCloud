@@ -226,6 +226,141 @@ class AnalyserTest extends PHPUnit_Framework_TestCase {
 
     /**
      * @test
+     */
+    public function singleUse() {
+        $analyser = new Analyser();
+
+        $code = '<?php use Some\\Namespaced\\Thing;';
+
+        $expected = [
+            'Some'       => 1,
+            'Namespaced' => 1,
+            'Thing'      => 1,
+        ];
+
+        $this->assertEquals($expected, $analyser->analyse($code));
+    }
+
+    /**
+     * @test
+     */
+    public function twoUses() {
+        $analyser = new Analyser();
+
+        $code = '<?php use Some\\Namespaced\\Thing, Another\\Namespaced\\Thing;';
+
+        $expected = [
+            'Some'       => 1,
+            'Namespaced' => 2,
+            'Thing'      => 2,
+            'Another'    => 1,
+        ];
+
+        $this->assertEquals($expected, $analyser->analyse($code));
+    }
+
+    /**
+     * @test
+     */
+    public function useWithAlias() {
+        $analyser = new Analyser();
+
+        $code = '<?php use Some\\Namespaced\\Thing as Another;';
+
+        $expected = [
+            'Some'       => 1,
+            'Namespaced' => 1,
+            'Thing'      => 1,
+            'Another'    => 1,
+        ];
+
+        $this->assertEquals($expected, $analyser->analyse($code));
+    }
+
+    /**
+     * @test
+     */
+    public function useWithUnneccessaryAlias() {
+        $analyser = new Analyser();
+
+        $code = '<?php use Some\\Namespaced\\Thing as Thing;';
+
+        $expected = [
+            'Some'       => 1,
+            'Namespaced' => 1,
+            'Thing'      => 1,
+        ];
+
+        $this->assertEquals($expected, $analyser->analyse($code));
+    }
+
+    /**
+     * @test
+     */
+    public function simpleClass() {
+        $analyser = new Analyser();
+
+        $code = '<?php class simple {}';
+
+        $expected = [
+            'simple' => 1,
+        ];
+
+        $this->assertEquals($expected, $analyser->analyse($code));
+    }
+
+    /**
+     * @test
+     */
+    public function extendingClass() {
+        $analyser = new Analyser();
+
+        $code = '<?php class simple extends another {}';
+
+        $expected = [
+            'simple' => 1,
+            'another' => 1,
+        ];
+
+        $this->assertEquals($expected, $analyser->analyse($code));
+    }
+
+    /**
+     * @test
+     */
+    public function implementingClass() {
+        $analyser = new Analyser();
+
+        $code = '<?php class simple implements another {}';
+
+        $expected = [
+            'simple' => 1,
+            'another' => 1,
+        ];
+
+        $this->assertEquals($expected, $analyser->analyse($code));
+    }
+
+    /**
+     * @test
+     */
+    public function complexClass() {
+        $analyser = new Analyser();
+
+        $code = '<?php abstract class complex extends bobble implements another, supplement {}';
+
+        $expected = [
+            'complex' => 1,
+            'another' => 1,
+            'bobble' => 1,
+            'supplement' => 1,
+        ];
+
+        $this->assertEquals($expected, $analyser->analyse($code));
+    }
+
+    /**
+     * @test
      * @expectedException \Codographic\Exception\UnknownNode
      */
     public function throwsExceptionForUnknownParserNodes() {
