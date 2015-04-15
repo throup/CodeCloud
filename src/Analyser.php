@@ -10,39 +10,47 @@ use PhpParser\ParserAbstract;
 
 class Analyser {
     const RECOGNISED_NODES = [
-//        'PhpParser\Node\Arg',
-//        'PhpParser\Node\Const_',
-//        'PhpParser\Node\Expr\Array_',
+        'PhpParser\Node\Arg',
+        'PhpParser\Node\Const_',
+        'PhpParser\Node\Expr\Array_',
 //        'PhpParser\Node\Expr\ArrayDimFetch',
-//        'PhpParser\Node\Expr\ArrayItem',
+        'PhpParser\Node\Expr\ArrayItem',
         'PhpParser\Node\Expr\Assign',
-//        'PhpParser\Node\Expr\BooleanNot',
+        'PhpParser\Node\Expr\BooleanNot',
+        'PhpParser\Node\Expr\BinaryOp\BooleanAnd',
+        'PhpParser\Node\Expr\BinaryOp\BooleanOr',
+        'PhpParser\Node\Expr\BinaryOp\LogicalAnd',
+        'PhpParser\Node\Expr\BinaryOp\LogicalOr',
+        'PhpParser\Node\Expr\BinaryOp\LogicalXor',
 //        'PhpParser\Node\Expr\Cast\String_',
 //        'PhpParser\Node\Expr\ClassConstFetch',
-//        'PhpParser\Node\Expr\ConstFetch',
+        'PhpParser\Node\Expr\ConstFetch',
 //        'PhpParser\Node\Expr\FuncCall',
 //        'PhpParser\Node\Expr\Instanceof_',
 //        'PhpParser\Node\Expr\Isset_',
 //        'PhpParser\Node\Expr\MethodCall',
-//        'PhpParser\Node\Expr\New_',
+        'PhpParser\Node\Expr\New_',
 //        'PhpParser\Node\Expr\PostInc',
-//        'PhpParser\Node\Expr\PropertyFetch',
+        'PhpParser\Node\Expr\PropertyFetch',
         'PhpParser\Node\Expr\Variable',
         'PhpParser\Node\Name',
-//        'PhpParser\Node\Param',
+        'PhpParser\Node\Name\Relative',
+        'PhpParser\Node\Param',
         'PhpParser\Node\Scalar\String_',
         'PhpParser\Node\Scalar\LNumber',
         'PhpParser\Node\Scalar\DNumber',
         'PhpParser\Node\Stmt\Class_',
-//        'PhpParser\Node\Stmt\ClassConst',
-//        'PhpParser\Node\Stmt\ClassMethod',
-//        'PhpParser\Node\Stmt\Else_',
+        'PhpParser\Node\Stmt\ClassConst',
+        'PhpParser\Node\Stmt\ClassMethod',
+        'PhpParser\Node\Stmt\Const_',
+        'PhpParser\Node\Stmt\Else_',
+        'PhpParser\Node\Stmt\ElseIf_',
 //        'PhpParser\Node\Stmt\Foreach_',
         'PhpParser\Node\Stmt\Global_',
-//        'PhpParser\Node\Stmt\If_',
+        'PhpParser\Node\Stmt\If_',
         'PhpParser\Node\Stmt\Namespace_',
-//        'PhpParser\Node\Stmt\Property',
-//        'PhpParser\Node\Stmt\PropertyProperty',
+        'PhpParser\Node\Stmt\Property',
+        'PhpParser\Node\Stmt\PropertyProperty',
 //        'PhpParser\Node\Stmt\Return_',
 //        'PhpParser\Node\Stmt\Throw_',
         'PhpParser\Node\Stmt\Use_',
@@ -58,27 +66,29 @@ class Analyser {
         'stmts', //
         'parts', //
         'uses',
-//        'type',
+//        'type', //
         'extends',
         'implements',
-//        'consts',
-//        'items',
-//        'key',
-//        'byRef',
-//        'params',
+        'consts',
+        'items',
+        'key',
+//        'byRef', //
+        'params',
 //        'returnType',
-//        'cond',
-//        'elseifs',
-//        'else',
-//        'class',
-//        'args',
+//        'variadic', //
+        'default',
+        'cond',
+        'elseifs',
+        'else',
+        'class',
+        'args',
+        'left',
+        'right',
+        'props',
 //        'unpack',
-//        'variadic',
-//        'default',
 //        'keyVar',
 //        'valueVar',
 //        'dim',
-//        'props',
     ];
 
     public function __construct(ParserAbstract $parser = null) {
@@ -109,6 +119,10 @@ class Analyser {
      */
     private function tally($name) {
         $name = (string) $name;
+        if ($name == '') {
+            return;
+        }
+
         if (!array_key_exists($name, $this->analysed)) {
             $this->analysed[$name] = 0;
         }
@@ -181,6 +195,12 @@ class Analyser {
             if ($node->alias != $node->name->getLast()) {
                 $this->tally($node->alias);
             }
+        }
+        if ($node instanceof Node\Param) {
+            // The type property appears to have different meanings
+            // for different Node types; we only care about the version
+            // for parameters.
+            $this->processOrTally($node->type);
         }
     }
 }
