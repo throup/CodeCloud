@@ -395,6 +395,32 @@ class AnalyserTest extends PHPUnit_Framework_TestCase {
     /**
      * @test
      */
+    public function useClassConstant() {
+        $analyser = new Analyser();
+
+        $code = <<< 'END_PHP'
+<?php
+class example {
+    const THIS = "value";
+}
+
+$object = new example;
+$object::THIS;
+END_PHP;
+
+        $expected = [
+            'example' => 2,
+            'THIS'    => 2,
+            'value'   => 1,
+            'object'  => 2,
+        ];
+
+        $this->assertEquals($expected, $analyser->analyse($code));
+    }
+
+    /**
+     * @test
+     */
     public function emptyArray() {
         $analyser = new Analyser();
 
@@ -542,6 +568,59 @@ END_PHP;
             'another'    => 1,
             'value'      => 1,
             'null'       => 1,
+        ];
+
+        $this->assertEquals($expected, $analyser->analyse($code));
+    }
+
+    /**
+     * @test
+     */
+    public function callClassMethodWithNoParameters() {
+        $analyser = new Analyser();
+
+        $code = <<< END_PHP
+<?php
+class example {
+    public function methodName(\$parameter) {}
+}
+
+\$object = new example();
+\$object->methodName();
+END_PHP;
+
+        $expected = [
+            'example'    => 2,
+            'methodName' => 2,
+            'parameter'  => 1,
+            'object'     => 2,
+        ];
+
+        $this->assertEquals($expected, $analyser->analyse($code));
+    }
+
+    /**
+     * @test
+     */
+    public function callClassMethodWithParameter() {
+        $analyser = new Analyser();
+
+        $code = <<< END_PHP
+<?php
+class example {
+    public function methodName(\$parameter) {}
+}
+
+\$object = new example();
+\$object->methodName('hello');
+END_PHP;
+
+        $expected = [
+            'example'    => 2,
+            'methodName' => 2,
+            'parameter'  => 1,
+            'object'     => 2,
+            'hello'      => 1,
         ];
 
         $this->assertEquals($expected, $analyser->analyse($code));
@@ -778,6 +857,159 @@ END_PHP;
     /**
      * @test
      */
+    public function logicalEqual() {
+        $analyser = new Analyser();
+
+        $code = <<< END_PHP
+<?php
+\$one == \$another;
+END_PHP;
+
+        $expected = [
+            'one' => 1,
+            'another' => 1,
+        ];
+
+        $this->assertEquals($expected, $analyser->analyse($code));
+    }
+
+    /**
+     * @test
+     */
+    public function logicalIdentical() {
+        $analyser = new Analyser();
+
+        $code = <<< END_PHP
+<?php
+\$one === \$another;
+END_PHP;
+
+        $expected = [
+            'one' => 1,
+            'another' => 1,
+        ];
+
+        $this->assertEquals($expected, $analyser->analyse($code));
+    }
+
+    /**
+     * @test
+     */
+    public function logicalNotEqual() {
+        $analyser = new Analyser();
+
+        $code = <<< END_PHP
+<?php
+\$one != \$another;
+\$one <> \$another;
+END_PHP;
+
+        $expected = [
+            'one'     => 2,
+            'another' => 2,
+        ];
+
+        $this->assertEquals($expected, $analyser->analyse($code));
+    }
+
+    /**
+     * @test
+     */
+    public function logicalNotIdentical() {
+        $analyser = new Analyser();
+
+        $code = <<< END_PHP
+<?php
+\$one !== \$another;
+END_PHP;
+
+        $expected = [
+            'one' => 1,
+            'another' => 1,
+        ];
+
+        $this->assertEquals($expected, $analyser->analyse($code));
+    }
+
+    /**
+     * @test
+     */
+    public function logicalGreaterThan() {
+        $analyser = new Analyser();
+
+        $code = <<< END_PHP
+<?php
+\$one > \$another;
+END_PHP;
+
+        $expected = [
+            'one' => 1,
+            'another' => 1,
+        ];
+
+        $this->assertEquals($expected, $analyser->analyse($code));
+    }
+
+    /**
+     * @test
+     */
+    public function logicalGreaterThanOrEqual() {
+        $analyser = new Analyser();
+
+        $code = <<< END_PHP
+<?php
+\$one >= \$another;
+END_PHP;
+
+        $expected = [
+            'one' => 1,
+            'another' => 1,
+        ];
+
+        $this->assertEquals($expected, $analyser->analyse($code));
+    }
+
+    /**
+     * @test
+     */
+    public function logicalLessThan() {
+        $analyser = new Analyser();
+
+        $code = <<< END_PHP
+<?php
+\$one < \$another;
+END_PHP;
+
+        $expected = [
+            'one' => 1,
+            'another' => 1,
+        ];
+
+        $this->assertEquals($expected, $analyser->analyse($code));
+    }
+
+    /**
+     * @test
+     */
+    public function logicalLessThanOrEqual() {
+        $analyser = new Analyser();
+
+        $code = <<< END_PHP
+<?php
+\$one <= \$another;
+END_PHP;
+
+        $expected = [
+            'one' => 1,
+            'another' => 1,
+        ];
+
+        $this->assertEquals($expected, $analyser->analyse($code));
+    }
+
+    /**
+     * @test
+     */
     public function singleClassPropertyDeclaration() {
         $analyser = new Analyser();
 
@@ -892,6 +1124,440 @@ END_PHP;
             'another'  => 1,
             'some'     => 1,
             'this'     => 1,
+        ];
+
+        $this->assertEquals($expected, $analyser->analyse($code));
+    }
+
+    /**
+     * @test
+     */
+    public function forEachWithNoKey() {
+        $analyser = new Analyser();
+
+        $code = <<< END_PHP
+<?php
+foreach (\$array as \$value) {}
+END_PHP;
+
+        $expected = [
+            'array' => 1,
+            'value' => 1,
+        ];
+
+        $this->assertEquals($expected, $analyser->analyse($code));
+    }
+
+    /**
+     * @test
+     */
+    public function forEachWithKey() {
+        $analyser = new Analyser();
+
+        $code = <<< END_PHP
+<?php
+foreach (\$array as \$key => \$value) {}
+END_PHP;
+
+        $expected = [
+            'array' => 1,
+            'key'   => 1,
+            'value' => 1,
+        ];
+
+        $this->assertEquals($expected, $analyser->analyse($code));
+    }
+
+    /**
+     * @test
+     */
+    public function simpleFunction() {
+        $analyser = new Analyser();
+
+        $code = <<< END_PHP
+<?php
+function foo() {}
+END_PHP;
+
+        $expected = [
+            'foo' => 1,
+        ];
+
+        $this->assertEquals($expected, $analyser->analyse($code));
+    }
+
+    /**
+     * @test
+     */
+    public function simpleFunctionWithTypedParameter() {
+        $analyser = new Analyser();
+
+        $code = <<< END_PHP
+<?php
+function foo(DateTime \$time) {}
+END_PHP;
+
+        $expected = [
+            'foo'      => 1,
+            'DateTime' => 1,
+            'time'     => 1,
+        ];
+
+        $this->assertEquals($expected, $analyser->analyse($code));
+    }
+
+    /**
+     * @test
+     */
+    public function simpleFunctionWithReturn() {
+        $analyser = new Analyser();
+
+        $code = <<< END_PHP
+<?php
+function foo() {
+    return 'value';
+}
+END_PHP;
+
+        $expected = [
+            'foo'   => 1,
+            'value' => 1,
+        ];
+
+        $this->assertEquals($expected, $analyser->analyse($code));
+    }
+
+    /**
+     * @test
+     */
+    public function functionCallNoParameters() {
+        $analyser = new Analyser();
+
+        $code = <<< END_PHP
+<?php
+foo();
+END_PHP;
+
+        $expected = [
+            'foo' => 1,
+        ];
+
+        $this->assertEquals($expected, $analyser->analyse($code));
+    }
+
+    /**
+     * @test
+     */
+    public function functionCallWithParameter() {
+        $analyser = new Analyser();
+
+        $code = <<< END_PHP
+<?php
+foo('bar');
+END_PHP;
+
+        $expected = [
+            'foo' => 1,
+            'bar' => 1,
+        ];
+
+        $this->assertEquals($expected, $analyser->analyse($code));
+    }
+
+    /**
+     * @test
+     */
+    public function postIncrement() {
+        $analyser = new Analyser();
+
+        $code = <<< END_PHP
+<?php
+\$var++;
+END_PHP;
+
+        $expected = [
+            'var' => 1,
+        ];
+
+        $this->assertEquals($expected, $analyser->analyse($code));
+    }
+
+    /**
+     * @test
+     */
+    public function postDecrement() {
+        $analyser = new Analyser();
+
+        $code = <<< END_PHP
+<?php
+\$var--;
+END_PHP;
+
+        $expected = [
+            'var' => 1,
+        ];
+
+        $this->assertEquals($expected, $analyser->analyse($code));
+    }
+
+    /**
+     * @test
+     */
+    public function preIncrement() {
+        $analyser = new Analyser();
+
+        $code = <<< END_PHP
+<?php
+++\$var;
+END_PHP;
+
+        $expected = [
+            'var' => 1,
+        ];
+
+        $this->assertEquals($expected, $analyser->analyse($code));
+    }
+
+    /**
+     * @test
+     */
+    public function preDecrement() {
+        $analyser = new Analyser();
+
+        $code = <<< END_PHP
+<?php
+--\$var;
+END_PHP;
+
+        $expected = [
+            'var' => 1,
+        ];
+
+        $this->assertEquals($expected, $analyser->analyse($code));
+    }
+
+    /**
+     * @test
+     */
+    public function throwAnException() {
+        $analyser = new Analyser();
+
+        $code = <<< END_PHP
+<?php
+throw new Exception();
+END_PHP;
+
+        $expected = [
+            'Exception' => 1,
+        ];
+
+        $this->assertEquals($expected, $analyser->analyse($code));
+    }
+
+    /**
+     * @test
+     */
+    public function castAsString() {
+        $analyser = new Analyser();
+
+        $code = <<< END_PHP
+<?php
+(string) \$variable;
+END_PHP;
+
+        $expected = [
+            'variable' => 1,
+        ];
+
+        $this->assertEquals($expected, $analyser->analyse($code));
+    }
+
+    /**
+     * @test
+     */
+    public function castAsInteger() {
+        $analyser = new Analyser();
+
+        $code = <<< END_PHP
+<?php
+(int)     \$variable;
+(integer) \$variable;
+END_PHP;
+
+        $expected = [
+            'variable' => 2,
+        ];
+
+        $this->assertEquals($expected, $analyser->analyse($code));
+    }
+
+    /**
+     * @test
+     */
+    public function castAsFloat() {
+        $analyser = new Analyser();
+
+        $code = <<< END_PHP
+<?php
+(float)  \$variable;
+(double) \$variable;
+(real)   \$variable;
+END_PHP;
+
+        $expected = [
+            'variable' => 3,
+        ];
+
+        $this->assertEquals($expected, $analyser->analyse($code));
+    }
+
+    /**
+     * @test
+     */
+    public function castAsBoolean() {
+        $analyser = new Analyser();
+
+        $code = <<< END_PHP
+<?php
+(bool)    \$variable;
+(boolean) \$variable;
+END_PHP;
+
+        $expected = [
+            'variable' => 2,
+        ];
+
+        $this->assertEquals($expected, $analyser->analyse($code));
+    }
+
+    /**
+     * @test
+     */
+    public function castAsArray() {
+        $analyser = new Analyser();
+
+        $code = <<< END_PHP
+<?php
+(array) \$variable;
+END_PHP;
+
+        $expected = [
+            'variable' => 1,
+        ];
+
+        $this->assertEquals($expected, $analyser->analyse($code));
+    }
+
+    /**
+     * @test
+     */
+    public function castAsObject() {
+        $analyser = new Analyser();
+
+        $code = <<< END_PHP
+<?php
+(object) \$variable;
+END_PHP;
+
+        $expected = [
+            'variable' => 1,
+        ];
+
+        $this->assertEquals($expected, $analyser->analyse($code));
+    }
+
+    /**
+     * @test
+     */
+    public function castAsBinaryString() {
+        $analyser = new Analyser();
+
+        $code = <<< END_PHP
+<?php
+(binary) \$variable;
+b"Binary";
+END_PHP;
+
+        $expected = [
+            'variable' => 1,
+            'Binary'   => 1,
+        ];
+
+        $this->assertEquals($expected, $analyser->analyse($code));
+    }
+
+    /**
+     * @test
+     */
+    public function arrayRead() {
+        $analyser = new Analyser();
+
+        $code = <<< END_PHP
+<?php
+\$a = \$array[\$key];
+END_PHP;
+
+        $expected = [
+            'a'     => 1,
+            'array' => 1,
+            'key'   => 1,
+        ];
+
+        $this->assertEquals($expected, $analyser->analyse($code));
+    }
+
+    /**
+     * @test
+     */
+    public function arrayWrite() {
+        $analyser = new Analyser();
+
+        $code = <<< END_PHP
+<?php
+\$array[\$key] = \$a;
+END_PHP;
+
+        $expected = [
+            'a'     => 1,
+            'array' => 1,
+            'key'   => 1,
+        ];
+
+        $this->assertEquals($expected, $analyser->analyse($code));
+    }
+
+    /**
+     * @test
+     */
+    public function callToIsset() {
+        $analyser = new Analyser();
+
+        $code = <<< 'END_PHP'
+<?php
+isset($a);
+END_PHP;
+
+        $expected = [
+            'a'     => 1,
+        ];
+
+        $this->assertEquals($expected, $analyser->analyse($code));
+    }
+
+    /**
+     * @test
+     */
+    public function callToInstanceof() {
+        $analyser = new Analyser();
+
+        $code = <<< 'END_PHP'
+<?php
+$a instanceof MyClass;
+END_PHP;
+
+        $expected = [
+            'a'       => 1,
+            'MyClass' => 1,
         ];
 
         $this->assertEquals($expected, $analyser->analyse($code));
