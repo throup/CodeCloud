@@ -1565,6 +1565,29 @@ END_PHP;
 
     /**
      * @test
+     */
+    public function stringWillBeTalliedInParts() {
+        $analyser = new Analyser();
+
+        $code = <<< 'END_PHP'
+<?php
+'This is a string of parts.';
+END_PHP;
+
+        $expected = [
+            'This'   => 1,
+            'is'     => 1,
+            'a'      => 1,
+            'string' => 1,
+            'of'     => 1,
+            'parts'  => 1,
+        ];
+
+        $this->assertEquals($expected, $analyser->analyse($code));
+    }
+
+    /**
+     * @test
      * @expectedException \Codographic\Exception\UnknownNode
      */
     public function throwsExceptionForUnknownParserNodes() {

@@ -123,6 +123,9 @@ class Analyser {
         foreach ($tokens as $node) {
             $this->processNode($node);
         }
+
+        ksort($this->analysed);
+        arsort($this->analysed);
         return $this->analysed;
     }
 
@@ -130,15 +133,16 @@ class Analyser {
      * @param string $name
      */
     private function tally($name) {
-        $name = (string) $name;
-        if ($name == '') {
-            return;
-        }
+        $parts = preg_split("/[^a-zA-Z0-9\\.]|\\.([^\\d]|\$)/", $name);
 
-        if (!array_key_exists($name, $this->analysed)) {
-            $this->analysed[$name] = 0;
+        foreach ($parts as $part) {
+            if ($part != '') {
+                if (!array_key_exists($part, $this->analysed)) {
+                    $this->analysed[$part] = 0;
+                }
+                $this->analysed[$part]++;
+            }
         }
-        $this->analysed[$name]++;
     }
 
     /**
